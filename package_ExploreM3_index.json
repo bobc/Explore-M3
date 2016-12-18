@@ -1,38 +1,38 @@
 {
-    "packages":
-    [
+  "packages": [
+    {
+      "name": "ExploreM3",
+      "maintainer": "ExploreEmbedded",
+      "websiteURL": "https://github.com/bobc/Explore-M3",
+      "email": "support@exploreembedded.com",
+      "help": {
+        "online": "https://github.com/bobc/Explore-M3/issues"
+      },
+      "platforms": [
         {
-            "name":"ExploreM3",
-            "maintainer":"ExploreEmbedded",
-            "websiteURL":"https://www.exploreembedded.com/",
-            "email":"support@exploreembedded.com",
-            "help":{ "online":"https://www.exploreembedded.com/wiki/index.php?title=Arduino%20Setup%20for%20Explore%20M3" },
-            "platforms": 
-            [
-                {
-                    "name": "Explore-M3(32-bits ARM Cortex-M3)",
-                    "architecture": "Explore-M3",
-                    "version": "1.0.0",
-                    "category": "ExploreM3",
-                    "url": "https://github.com/ExploreEmbedded/Explore-M3/raw/master/Explore-M3.zip",
-                    "archiveFileName": "Explore-M3.zip",
-                    "checksum": "SHA-256:d80d5f89a5247b7ade0129a69f3356d53eea7ce005ba8c1fda407827b4e7f40c",
-                    "size": "19649972",
-                    "boards":
-                    [
-                        {"name": "Explore M3"}
-                    ],
-                    "toolsDependencies": 
-                    [
-                       {
-                            "packager": "arduino",
-                            "name": "arm-none-eabi-gcc",
-                            "version": "4.8.3-2014q1"
-                        }
-                    ]
-                }
-            ],
-            "tools": []
+          "name": "Explore-M3(32-bits ARM Cortex-M3)",
+          "architecture": "Explore-M3",
+          "version": "1.0.0",
+          "category": "ExploreM3",
+          "url": "https://github.com/bobc/Explore-M3/raw/master/Explore-M3.zip",
+          "archiveFileName": "Explore-M3.zip",
+          "checksum": "e6f28f97a6305d501dc2acc1b3ce57e663596893615dd27ad1b5a09d4e6b74da",
+          "size": 9764062,
+          "boards": [
+            {
+              "name": "Explore M3"
+            }
+          ],
+          "toolsDependencies": [
+            {
+              "packager": "arduino",
+              "name": "arm-none-eabi-gcc",
+              "version": "4.8.3-2014q1"
+            }
+          ]
         }
-    ]
+      ],
+      "tools": []
+    }
+  ]
 }
