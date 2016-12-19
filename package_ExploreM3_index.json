@@ -10,8 +10,8 @@
       },
       "platforms": [
         {
-          "name": "Explore-M3(32-bits ARM Cortex-M3)",
-          "architecture": "Explore-M3",
+          "name": "Explore-M3 (LPC1768)",
+          "architecture": "ExploreM3",
           "version": "1.0.0",
           "category": "ExploreM3",
           "url": "https://github.com/bobc/Explore-M3/raw/master/Explore-M3.zip",
