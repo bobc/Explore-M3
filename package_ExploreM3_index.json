@@ -16,8 +16,8 @@
           "category": "ExploreM3",
           "url": "https://github.com/bobc/Explore-M3/raw/master/Explore-M3.zip",
           "archiveFileName": "Explore-M3.zip",
-          "checksum": "SHA-256:e6f28f97a6305d501dc2acc1b3ce57e663596893615dd27ad1b5a09d4e6b74da",
-          "size": 9764062,
+          "checksum": "SHA-256:be967bb57fadfe9d51cce389a1646bddc0bfa1bfeada136ec141d52f3e570d8e",
+          "size": 9766532,
           "boards": [
             {
               "name": "Explore M3"

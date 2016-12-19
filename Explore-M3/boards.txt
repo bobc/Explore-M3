@@ -9,6 +9,7 @@ Explore_LPC1768.build.mcu=cortex-m3
 Explore_LPC1768.build.f_cpu=12000000L
 Explore_LPC1768.build.usb_product="Explore M3 DFU"
 Explore_LPC1768.build.board=ExploreM3
+Explore_LPC1768.build.arch=ExploreM3
 Explore_LPC1768.build.core=ExploreM3
 Explore_LPC1768.build.extra_flags=-D__EXPLORE_M3__ -mthumb {build.usb_flags}
 Explore_LPC1768.build.ldscript=linker_scripts/gcc/LPC17xx.ld

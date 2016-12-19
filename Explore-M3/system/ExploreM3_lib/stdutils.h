@@ -149,7 +149,7 @@ typedef uint8_t byte;
 #endif
 
 #ifndef FALSE
-#define FASLE   0
+#define FALSE   0
 #endif
 
 #ifndef TRUE
@@ -177,9 +177,13 @@ typedef uint8_t byte;
 #define C_NULL_U8          0x00u
 #define NULL_CHAR          0x00u
 
+#ifndef FALSE
+  #define FALSE              0x00u
+#endif
 
-#define FALSE              0x00u
-#define TRUE               0x01u
+#ifndef TRUE
+  #define TRUE               0x01u
+#endif
 
 #define C_NOTOK_U8         0x00u
 #define C_OK_U8            0x01u
