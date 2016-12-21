@@ -88,15 +88,15 @@ extern unsigned long __data_end__;		/* end address for the .data section. define
 extern unsigned long __bss_start__;			/* start address for the .bss section. defined in linker script */
 extern unsigned long __bss_end__;			/* end address for the .bss section. defined in linker script */
 
-extern void _estack;		/* init value for the stack pointer. defined in linker script */
-
-
+extern unsigned long __StackTop;
 
 /* Private typedef -----------------------------------------------------------*/
+
 /* function prototypes ------------------------------------------------------*/
 void Reset_Handler(void) __attribute__((__interrupt__));
 extern int main(void);
-extern void _CPUregTestPOST (void);
+
+//extern void _CPUregTestPOST (void);
 
 /******************************************************************************
 *
@@ -105,17 +105,12 @@ extern void _CPUregTestPOST (void);
 * 0x0000.0000.
 *
 ******************************************************************************/
-#define STACK_SIZE                              0x00000200
-
-__attribute__ ((section(".stackarea")))
-/* static */ unsigned long pulStack[STACK_SIZE];
 
 
 __attribute__ ((section(".isr_vector")))
 void (* const g_pfnVectors[])(void) =
 {
-        /* &_estack,                   // The initial stack pointer */
-		(void (*)(void))((unsigned long)pulStack + sizeof(pulStack)),  // The initial stack pointer
+        (void (*)(void))&__StackTop,
         Reset_Handler,             /* Reset Handler */
         NMI_Handler,               /* NMI Handler */
         HardFault_Handler,         /* Hard Fault Handler */
@@ -179,7 +174,6 @@ void (* const g_pfnVectors[])(void) =
 *******************************************************************************/
 void Reset_Handler(void)
 {
-  //  SystemInit();
     unsigned long *pulSrc, *pulDest;
 
     /*
@@ -211,7 +205,7 @@ void Reset_Handler(void)
     pulSrc = &__sidata;
     for(pulDest = &__data_start__; pulDest < &__data_end__; )
     {
-        *(pulDest++) = *(pulSrc++);
+        *pulDest++ = *pulSrc++;
     }
 #endif
 
@@ -221,13 +215,10 @@ void Reset_Handler(void)
     //
     for(pulDest = &__bss_start__; pulDest < &__bss_end__; )
     {
-        *(pulDest++) = 0;
+        *pulDest++ = 0;
     }
 
-    //
-    //  Call IEC60335 CPU register tests POST
-    //
-//    __ASM volatile ("bl _CPUregTestPOST \t\n");
+    SystemInit();
 
     //
     // Call the application's entry point.

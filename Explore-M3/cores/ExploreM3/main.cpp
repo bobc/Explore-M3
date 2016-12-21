@@ -43,39 +43,30 @@ extern void (*__init_array_end []) (void) __attribute__((weak));
 __attribute__ ((section(".heap")))  
 unsigned char heap[HEAP_SIZE];
 
+#define USER_FLASH_START 0          // If no bootloader
+//#define USER_FLASH_START 0x2000   // If bootloader
 
+extern "C" void __libc_init_array(void);
 
 int main( void )
 {
-    
-  unsigned int count;
-  unsigned int i;
-  
-  SystemInit();
   SystemCoreClockUpdate();
-  rgbInit();
 
+  __libc_init_array();
 
-  count = __preinit_array_end - __preinit_array_start;
-  for (i = 0; i < count; i++)
-    __preinit_array_start[i] ();
-
-  count = __init_array_end - __init_array_start;
-  for (i = 0; i < count; i++)
-    __init_array_start[i] ();
+  /* Change the Vector Table to the USER_FLASH_START */
+  SCB->VTOR = (USER_FLASH_START & 0x1FFFFF80);
 
   SysTick_Init();
   SysTick_Start();
+
   Serial.begin(9600);
-  
      
 	setup();
 
 	for (;;)
 	{
-        loop();
-    
-	
+    loop();
 	}
 
 	return 0;

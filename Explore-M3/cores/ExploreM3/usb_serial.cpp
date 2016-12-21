@@ -55,13 +55,15 @@ USBSerial::USBSerial(void)
  * Set up/tear down
  */
 
-int connectionTimeOut=0;
 void USBSerial::begin(uint32_t baud) 
 {
+  int connectionTimeOut=0;
+
     /* ExploreEmbedded:
      * USB_Initialization done in constructor itself, so USB_Serial class is always enabled.*/
-     //Wait time for USB to be detected as VCOM or gets timedout(after 1sec) if USB is not connected
-     // Calling Serial.bein() more than once will increase the wait time so extracheck is added to handle it. 
+
+   // Wait time for USB to be detected as VCOM or gets timedout(after 1sec) if USB is not connected
+   // Calling Serial.bein() more than once will increase the wait time so extracheck is added to handle it.
 
     
    if(connectionTimeOut == 0)
@@ -108,7 +110,7 @@ int USBSerial::available(void) {
 
   CDC_OutBufAvailChar (&numAvailByte);
         
-    return numAvailByte;
+  return numAvailByte;
 }
 
 
@@ -128,19 +130,21 @@ int USBSerial::availableForWrite(void)
 }
 
 
-extern volatile int TxDoneFlag; //Flag to indicate the USB frame is transmitted.
+extern volatile int TxDoneFlag; // Flag to indicate the USB frame is transmitted.
+
 size_t USBSerial::write(unsigned char ch) {
   unsigned int usbDisconnectTimeout = millis()+2;
 
   USB_WriteEP (CDC_DEP_IN, (unsigned char *)&ch, 1);
 
   while(TxDoneFlag==0)
-  { //This falg will be set by USB EndPoint2 Tx call back function. 
+  {
+      //This flag will be set by USB EndPoint2 Tx call back function.
       if(millis() > usbDisconnectTimeout)
           break;       
-    }
+  }
     
-    TxDoneFlag = 0;
+  TxDoneFlag = 0;
 	return 1;
 }
 

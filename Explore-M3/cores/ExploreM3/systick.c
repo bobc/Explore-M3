@@ -37,7 +37,7 @@ Errors and omissions should be reported to codelibraries@exploreembedded.com
 #include "stdutils.h"
 
 
-uint32_t V_SysTickMiliSecCount_U32 = 0;
+volatile uint32_t V_SysTickMiliSecCount_U32 = 0;
 sysTickCallBackFunPtr sysTickCallBack = NULL;
 
 

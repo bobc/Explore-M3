@@ -55,11 +55,11 @@ extern "C" {
 #define SYSTICK_RELOAD		(*( ( volatile unsigned long *) 0xE000E014 ))
 #define SYSTICK_CURR		(*( ( volatile unsigned long *) 0xE000E018 ))
 
-/* 100000000Mhz * 1us = 100 */
-#define COUNT_PER_US  100
+/*  */
+#define COUNT_PER_US  (F_CPU/1000000)
 
-/* 100000000Mhz * 1ms = 1000000 - 1 */
-#define COUNT_PER_MS  99999
+/*  */
+#define COUNT_PER_MS  ((F_CPU/1000)-1)
 
 typedef void (*sysTickCallBackFunPtr)(void);
 /*************************************************************************************************/
