@@ -36,7 +36,7 @@ Errors and omissions should be reported to codelibraries@exploreembedded.com
 #include "stdutils.h"
 #include "gpio.h"
 #include "rgb.h"
-#include "board.h"
+#include "variant.h"
 
 
 /***************************************************************************************************
