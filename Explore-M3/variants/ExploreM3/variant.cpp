@@ -1,166 +1,95 @@
-/*
-  Copyright (c) 2011 Arduino.  All right reserved.
+/******************************************************************************
+ * The MIT License
+ *
+ * Copyright (c) 2011 LeafLabs, LLC.
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy,
+ * modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+ * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *****************************************************************************/
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the GNU Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+/**
+ * @file   wirish/boards/maple_mini/board.cpp
+ * @author Marti Bolivar <mbolivar@leaflabs.com>
+ * @brief  Explore M3 board file.
+ */
 
 #include "variant.h"
+#include "gpio.h"
+#include "stdutils.h"
 
-/*
- * DUE Board pin   |  PORT  | Label
- * ----------------+--------+-------
- *   0             |  PA8   | "RX0"
- *   1             |  PA9   | "TX0"
- *   2       TIOA0 |  PB25  |
- *   3       TIOA7 |  PC28  |
- *   4       NPCS1 |  PA29  |
- *           TIOB6 |  PC26  |
- *   5       TIOA6 |  PC25  |
- *   6       PWML7 |  PC24  |
- *   7       PWML6 |  PC23  |
- *   8       PWML5 |  PC22  |
- *   9       PWML4 |  PC21  |
- *  10       NPCS0 |  PA28  |
- *           TIOB7 |  PC29  |
- *  11       TIOA8 |  PD7   |
- *  12       TIOB8 |  PD8   |
- *  13       TIOB0 |  PB27  | LED AMBER "L"
- *  14       TXD3  |  PD4   | "TX3"
- *  15       RXD3  |  PD5   | "RX3"
- *  16       TXD1  |  PA13  | "TX2"
- *  17       RXD1  |  PA12  | "RX2"
- *  18       TXD0  |  PA11  | "TX1"
- *  19       RXD0  |  PA10  | "RX1"
- *  20             |  PB12  | "SDA"
- *  21             |  PB13  | "SCL"
- *  22             |  PB26  |
- *  23             |  PA14  |
- *  24             |  PA15  |
- *  25             |  PD0   |
- *  26             |  PD1   |
- *  27             |  PD2   |
- *  28             |  PD3   |
- *  29             |  PD6   |
- *  30             |  PD9   |
- *  31             |  PA7   |
- *  32             |  PD10  |
- *  33             |  PC1   |
- *  34             |  PC2   |
- *  35             |  PC3   |
- *  36             |  PC4   |
- *  37             |  PC5   |
- *  38             |  PC6   |
- *  39             |  PC7   |
- *  40             |  PC8   |
- *  41             |  PC9   |
- *  42             |  PA19  |
- *  43             |  PA20  |
- *  44             |  PC19  |
- *  45             |  PC18  |
- *  46             |  PC17  |
- *  47             |  PC16  |
- *  48             |  PC15  |
- *  49             |  PC14  |
- *  50             |  PC13  |
- *  51             |  PC12  |
- *  52       NPCS2 |  PB21  |
- *  53             |  PB14  |
- *  54             |  PA16  | "A0"
- *  55             |  PA24  | "A1"
- *  56             |  PA23  | "A2"
- *  57             |  PA22  | "A3"
- *  58       TIOB2 |  PA6   | "A4"
- *  69             |  PA4   | "A5"
- *  60       TIOB1 |  PA3   | "A6"
- *  61       TIOA1 |  PA2   | "A7"
- *  62             |  PB17  | "A8"
- *  63             |  PB18  | "A9"
- *  64             |  PB19  | "A10"
- *  65             |  PB20  | "A11"
- *  66             |  PB15  | "DAC0"
- *  67             |  PB16  | "DAC1"
- *  68             |  PA1   | "CANRX"
- *  69             |  PA0   | "CANTX"
- *  70             |  PA17  | "SDA1"
- *  71             |  PA18  | "SCL1"
- *  72             |  PC30  | LED AMBER "RX"
- *  73             |  PA21  | LED AMBER "TX"
- *  74       MISO  |  PA25  |
- *  75       MOSI  |  PA26  |
- *  76       SCLK  |  PA27  |
- *  77       NPCS0 |  PA28  |
- *  78       NPCS3 |  PB23  | unconnected!
+
+/* 
+ * Saheb
+ * 
+ * 04/03/2016
  *
- * USB pin         |  PORT
- * ----------------+--------
- *  ID             |  PB11
- *  VBOF           |  PB10
- *
- */
+ * Added the pin mapping for Explore M3 
+ */	
+const uint8_t PIN_MAP[BOARD_MAX_GPIO_PINS] = {
+    
+    P0_3 ,    /* 0 */
+    P0_2 ,    /* 1 */
+    P0_1 ,    /* 2 */
+    P0_0 ,    /* 3 */
+    P0_11,    /* 4 */
+    P0_10,    /* 5 */
+    P0_16,    /* 6 */
+    P0_15,    /* 7 */
+    P0_17,    /* 8 */
+    P0_18,    /* 9 */
+    P0_9 ,    /* 10 */
+    P0_8 ,    /* 11 */
+    P0_7 ,    /* 12 */
+    P0_6 ,    /* 13 */
+    P0_5 ,    /* 14 */
+    P0_4 ,    /* 15 */
+    P1_29,    /* 16 */
+    P0_22,    /* 17 */
+    P0_21,    /* 18 */
+    P0_20,    /* 19 */
+    P0_19,    /* 20 */
+    P2_8 ,    /* 21 */
+    P2_7 ,    /* 22 */
+    P2_6 ,    /* 23 */
+    P2_5 ,    /* 24 PWM_6 */
+    P2_4 ,    /* 25 PWM_5 */
+    P2_3 ,    /* 26 PWM_4 */
+    P2_2 ,    /* 27 PWM_3 */
+    P2_1 ,    /* 28 PWM_2 */
+    P2_0 ,    /* 29 PWM_1 */
+    P2_12,    /* 30 */
+    P2_13,    /* 31 */
+    P1_9,     /* 32 */
+    P1_31,    /* 33 *//* A4 */
+    P0_26,    /* 34 *//* A3 */
+    P0_25,    /* 35 *//* A2 */
+    P0_24,    /* 36 *//* A1 */
+    P0_23,    /* 37 *//* A0 */
+    P1_0 ,    /* 38 RGB_RED */
+    P1_1 ,    /* 39 RGB_GREEN */
+    P1_4 ,    /* 40 RGB_BLUE */
+    P2_11     /* 41 USB_BOOT_SWITCH */
+};
 
 
-/*
- * UART objects
- */
 
-// IT handlers
-void UART_Handler(void)
-{
+
  
-}
-
-// ----------------------------------------------------------------------------
-/*
- * USART objects
- */
-
-
-
-
-// IT handlers
-void USART0_Handler(void)
-{
- 
-}
-
-void USART1_Handler(void)
-{
- 
-}
-
-void USART3_Handler(void)
-{
-
-}
-
-// ----------------------------------------------------------------------------
-
-void serialEventRun(void)
-{
-
-}
-
-// ----------------------------------------------------------------------------
-
-
-
-
-void init( void )
-{
-
-}
-
-
 

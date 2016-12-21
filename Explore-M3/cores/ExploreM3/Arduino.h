@@ -14,7 +14,7 @@
 #include "rgb.h"
 #include "adc.h"
 #include "pwm.h"
-#include "board.h"
+#include "variant.h"
 #include "systick.h"
 #include "exti.h"
 #include "timer.h"

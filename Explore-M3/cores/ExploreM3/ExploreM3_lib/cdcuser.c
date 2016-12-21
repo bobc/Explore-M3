@@ -28,7 +28,7 @@
 #include "gpio.h"
 #include "delay.h"
 #include "iap_drv.h"
-#include "board.h"
+#include "variant.h"
 
 
 

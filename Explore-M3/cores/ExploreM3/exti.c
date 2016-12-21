@@ -35,7 +35,7 @@ Errors and omissions should be reported to codelibraries@exploreembedded.com
 #include "exti.h"
 #include "stdutils.h"
 #include "gpio.h"
-#include "board.h"
+#include "variant.h"
 
 
 
