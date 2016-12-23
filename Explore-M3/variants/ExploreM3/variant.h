@@ -25,20 +25,18 @@
  *****************************************************************************/
 
 /**
- * @file   wirish/boards/maple_mini/include/board/board.h
- * @author Marti Bolivar <mbolivar@leaflabs.com>
+ * @file
+ * @author
  * @brief  Explore M3 board header.
  *
- * See wirish/boards/maple/include/board/board.h for more information
- * on these definitions.
  */
  
- #ifdef __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifndef _BOARD_EXPLORE_M3_H_
-#define _BOARD_EXPLORE_M3_H_
+#ifndef _VARIANT_H_
+#define _VARIANT_H_
 
 #include "stdutils.h"
 #include "gpio.h"
@@ -48,6 +46,7 @@ extern "C" {
 
 
 #define EXPLORE_M3_RESET_STRING "r$T^^3"
+
 extern const uint8_t PIN_MAP[BOARD_MAX_GPIO_PINS];
 
 #define LED_BUILTIN 13
@@ -83,7 +82,7 @@ static unsigned const int A4 = 33;
 
 
 /************************************
-             RGB pins
+             PWM pins
 ************************************/             
 #define   PWM_1      29
 #define   PWM_2      28

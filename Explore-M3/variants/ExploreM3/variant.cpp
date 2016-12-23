@@ -25,8 +25,8 @@
  *****************************************************************************/
 
 /**
- * @file   wirish/boards/maple_mini/board.cpp
- * @author Marti Bolivar <mbolivar@leaflabs.com>
+ * @file
+ * @author
  * @brief  Explore M3 board file.
  */
 
