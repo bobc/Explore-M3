@@ -43,7 +43,6 @@ Errors and omissions should be reported to codelibraries@exploreembedded.com
 #include "uart.h"
 #include "usart.h"
 #include "gpio.h"
-#include "rgb.h"
 #include "lpc17xx.h"
 
 #define C_MaxUartChannels_U8 4u

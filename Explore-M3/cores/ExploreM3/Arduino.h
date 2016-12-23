@@ -11,7 +11,6 @@
 #include "stdutils.h"
 #include "bit_constants.h"
 #include "gpio.h"
-#include "rgb.h"
 #include "adc.h"
 #include "pwm.h"
 #include "variant.h"
@@ -20,10 +19,6 @@
 #include "timer.h"
 #include "uart.h"
 #include "delay.h"
-
-
-
-
 
 #include "wiring_digital.h"
 #include "wiring_analog.h"
@@ -35,7 +30,8 @@
 
 extern void loop();
 extern void setup();
-extern void init( void );
+
+//extern void init( void );
 
 
 #ifdef __cplusplus

@@ -36,7 +36,6 @@
 #include "usbcore.h"
 #include "cdc.h"
 #include "cdcuser.h"
-#include "rgb.h"
 #include "wirish_time.h"
 #include "systick.h"
 
