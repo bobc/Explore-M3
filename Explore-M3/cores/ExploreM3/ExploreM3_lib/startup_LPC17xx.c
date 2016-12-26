@@ -96,8 +96,6 @@ extern unsigned long __StackTop;
 void Reset_Handler(void) __attribute__((__interrupt__));
 extern int main(void);
 
-//extern void _CPUregTestPOST (void);
-
 /******************************************************************************
 *
 * The minimal vector table for a Cortex M3.  Note that the proper constructs
@@ -105,7 +103,6 @@ extern int main(void);
 * 0x0000.0000.
 *
 ******************************************************************************/
-
 
 __attribute__ ((section(".isr_vector")))
 void (* const g_pfnVectors[])(void) =
@@ -175,6 +172,8 @@ void (* const g_pfnVectors[])(void) =
 void Reset_Handler(void)
 {
     unsigned long *pulSrc, *pulDest;
+
+    __disable_irq();
 
     /*
      * This used for cleaning AHBRAM0 section

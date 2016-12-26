@@ -41,7 +41,7 @@ extern "C" {
 #include "stdutils.h"
 #include "gpio.h"
 
-#define LED_BUILTIN 13
+// #define LED_BUILTIN 13
 
 #define BOARD_MAX_GPIO_PINS  84
 

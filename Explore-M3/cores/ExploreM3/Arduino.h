@@ -31,7 +31,7 @@
 extern void loop();
 extern void setup();
 
-//extern void init( void );
+extern void variant_init( void );
 
 
 #ifdef __cplusplus
@@ -51,7 +51,8 @@ unsigned long pulseInLong(uint8_t pin, uint8_t state, unsigned long timeout);
 #include "Stream.h"
 #include "eeprom.h"
 
-#include "usb_serial.h"
+#include "USBSerial.h"  //
+
 #include "wirish_math.h"
 
 #endif // __cplusplus

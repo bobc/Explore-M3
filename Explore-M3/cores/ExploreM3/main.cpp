@@ -26,11 +26,7 @@ and that both those copyright notices and this permission notice appear in suppo
 ***************************************************************************************************/
 #define ARDUINO_MAIN
 #include "Arduino.h"
-#include "gpio.h"
-
 #include "lpc17xx.h"
-#include "stdutils.h"
-
 
 
 extern void (*__preinit_array_start []) (void) __attribute__((weak));
@@ -38,30 +34,33 @@ extern void (*__preinit_array_end []) (void) __attribute__((weak));
 extern void (*__init_array_start []) (void) __attribute__((weak));
 extern void (*__init_array_end []) (void) __attribute__((weak));
 
+extern "C" void __libc_init_array(void);
+
+#define USER_FLASH_START 0          // If no bootloader
+//#define USER_FLASH_START 0x2000   // If bootloader
+
 #define HEAP_SIZE 1024
 
 __attribute__ ((section(".heap")))  
 unsigned char heap[HEAP_SIZE];
 
-#define USER_FLASH_START 0          // If no bootloader
-//#define USER_FLASH_START 0x2000   // If bootloader
-
-extern "C" void __libc_init_array(void);
-
 int main( void )
 {
   SystemCoreClockUpdate();
 
-  __libc_init_array();
-
   /* Change the Vector Table to the USER_FLASH_START */
   SCB->VTOR = (USER_FLASH_START & 0x1FFFFF80);
+
+  __libc_init_array();
+
+  __enable_irq();
 
   SysTick_Init();
   SysTick_Start();
 
-  Serial.begin(9600);
-     
+  variant_init();
+  //
+
 	setup();
 
 	for (;;)
