@@ -14,7 +14,7 @@
  * Copyright (c) 2009 Keil - An ARM Company. All rights reserved.
  *---------------------------------------------------------------------------*/
 #include "lpc17xx.h"                                   // LPC17xx definitions
-#include "type.h"
+//#include "type.h"
 #include "serial.h"
 
 

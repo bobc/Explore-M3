@@ -37,6 +37,7 @@
 
 /* Includes ------------------------------------------------------------------- */
 #include <stdint.h>
+#include <stdbool.h>
 
 
 /* Public Types --------------------------------------------------------------- */
@@ -47,7 +48,16 @@
 /**
  * @brief Boolean Type definition
  */
-typedef enum {FALSE = 0, TRUE = !FALSE} Bool;
+//  typedef enum {FALSE = 0, TRUE = !FALSE} Bool;
+#ifndef FALSE
+  #define FALSE   0
+#endif
+
+#ifndef TRUE
+  #define TRUE   1
+#endif
+
+typedef bool Bool;
 
 /**
  * @brief Flag Status and Interrupt Flag Status type definition
