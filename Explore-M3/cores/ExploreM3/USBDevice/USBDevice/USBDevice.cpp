@@ -20,15 +20,14 @@
 
 // for memcpy
 #include <cstring>
-// for iprintf
-//!#include <cstdio>
 
 #include "USBEndpoints.h"
 #include "USBDevice.h"
 #include "USBDescriptor.h"
 
-#define DEBUG 1
-#define printf iprintf
+// for iprintf etc
+//#define DEBUG 1
+#include "debug.h"
 
 /* Device status */
 #define DEVICE_STATUS_SELF_POWERED  (1U<<0)
@@ -45,10 +44,6 @@
 #define WINDEX_TO_PHYSICAL(endpoint) (((endpoint & 0x0f) << 1) + \
     ((endpoint & 0x80) ? 1 : 0))
 
-#define iprintf(...)
-
-#define setled(a, b) do {} while (0)
-// extern void setled(int, bool);
 
 bool USBDevice::setDescriptors(usbdesc_base ** newDescriptors)
 {
@@ -173,7 +168,8 @@ bool USBDevice::requestGetDescriptor(void)
     bType = DESCRIPTOR_TYPE(transfer.setup.wValue);
     bIndex = DESCRIPTOR_INDEX(transfer.setup.wValue);
 
-    iprintf("GET DESCRIPTOR %02Xh %02Xh\n", bType, bIndex);
+    xprintf("GET DESC %02X %02X\n", bType, bIndex);
+
     int i = findDescriptorIndex(bType, bIndex);
     if (i >= 0) {
         iprintf("FOUND at %d\n", i);
@@ -193,6 +189,7 @@ bool USBDevice::requestGetDescriptor(void)
         return true;
     }
 
+    xprintf("NOT FOUND\n");
     return false;
 }
 
@@ -210,7 +207,7 @@ void USBDevice::decodeSetupPacket(uint8_t *data, SETUP_PACKET *packet)
 
 bool USBDevice::controlOut(void)
 {
-    iprintf("{ControlOUT}");
+    iprintf("{ControlOUT}\n");
     /* Control transfer data OUT stage */
 //     uint8_t buffer[MAX_PACKET_SIZE_EP0];
     int32_t packetSize;
@@ -228,6 +225,7 @@ bool USBDevice::controlOut(void)
     if (packetSize > transfer.remaining)
     {
         /* Too big */
+        xprintf("!e2");
         return false;
     }
 
@@ -259,7 +257,7 @@ bool USBDevice::controlOut(void)
 
 bool USBDevice::controlIn(void)
 {
-    iprintf("{ControlIN}");
+    iprintf("{ControlIN}\n");
     /* Control transfer data IN stage */
     uint32_t packetSize;
 
@@ -331,6 +329,8 @@ bool USBDevice::controlIn(void)
 
 bool USBDevice::requestSetAddress(void)
 {
+    xprintf("set add %02X\n", transfer.setup.wValue);
+
     /* Set the device address */
     setAddress(transfer.setup.wValue);
 
@@ -351,7 +351,7 @@ bool USBDevice::requestSetAddress(void)
 bool USBDevice::requestSetConfiguration(void)
 {
     device.configuration = transfer.setup.wValue;
-    iprintf("SET CONFIGURATION: %d\n", transfer.setup.wValue);
+    xprintf("SET CFG %d\n", transfer.setup.wValue);
     /* Set the device configuration */
     if (device.configuration == 0)
     {
@@ -364,14 +364,14 @@ bool USBDevice::requestSetConfiguration(void)
     {
         if (USBCallback_setConfiguration(device.configuration))
         {
-            iprintf("SET CONFIGURATION:SUCCESS!\n");
+            xprintf("SET CFG:ok\n");
             /* Valid configuration */
             configureDevice();
             device.state = CONFIGURED;
         }
         else
         {
-            iprintf("SET CONFIGURATION:failure!\n");
+            xprintf("SET CONFIGURATION:failure!\n");
             return false;
         }
     }
@@ -543,6 +543,8 @@ bool USBDevice::requestSetup(void)
     /* Process standard requests */
     if ((transfer.setup.bmRequestType.Type == STANDARD_TYPE))
     {
+        xprintf("REQ %02x - ", transfer.setup.bRequest);
+
         switch (transfer.setup.bRequest)
         {
              case GET_STATUS:
@@ -577,7 +579,7 @@ bool USBDevice::requestSetup(void)
 
 bool USBDevice::controlSetup(void)
 {
-    iprintf("{ControlSETUP}");
+    iprintf("{ControlSETUP}\n");
     /* Control transfer setup stage */
 
     EP0setup(control_buffer);
@@ -590,14 +592,15 @@ bool USBDevice::controlSetup(void)
     transfer.zlp = false;
     transfer.notify = false;
 
-#ifdef DEBUG
-    printf("dataTransferDirection: %d\r\nType: %d\r\nRecipient: %d\r\nbRequest: %d\r\nwValue: %d\r\nwIndex: %d\r\nwLength: %d\r\n",transfer.setup.bmRequestType.dataTransferDirection,
-                                                                                                                                   transfer.setup.bmRequestType.Type,
-                                                                                                                                   transfer.setup.bmRequestType.Recipient,
-                                                                                                                                   transfer.setup.bRequest,
-                                                                                                                                   transfer.setup.wValue,
-                                                                                                                                   transfer.setup.wIndex,
-                                                                                                                                   transfer.setup.wLength);
+#ifdef xDEBUG
+    printf("dataTransferDirection: %d Type: %d Recipient: %d Request: %d Value: %d Index: %d Length: %d\n",
+       transfer.setup.bmRequestType.dataTransferDirection,
+       transfer.setup.bmRequestType.Type,
+       transfer.setup.bmRequestType.Recipient,
+       transfer.setup.bRequest,
+       transfer.setup.wValue,
+       transfer.setup.wIndex,
+       transfer.setup.wLength);
 #endif
 
     /* Class / vendor specific */
@@ -611,7 +614,7 @@ bool USBDevice::controlSetup(void)
 #endif
             return false;
         }
-        iprintf("OK\n");
+        // iprintf("OK\n");
     }
 
     /* Check transfer size and direction */
@@ -700,6 +703,8 @@ bool USBDevice::controlSetup(void)
 
 bool USBDevice::USBEvent_busReset(void)
 {
+    xprintf("busReset\n");
+
     device.state = DEFAULT;
     device.configuration = 0;
     device.suspended = false;
@@ -716,7 +721,7 @@ bool USBDevice::USBEvent_Frame(uint16_t Frame)
 void USBDevice::EP0setupCallback(void)
 {
 #ifdef DEBUG
-    iprintf("EP0Setup\n");
+    iprintf("EP0Setup - ");
 #endif
     /* Endpoint 0 setup event */
     if (!controlSetup())
@@ -729,7 +734,7 @@ void USBDevice::EP0setupCallback(void)
 void USBDevice::EP0out(void)
 {
 #ifdef DEBUG
-    iprintf("EP0OUT\n");
+    iprintf("EP0OUT - ");
 #endif
     /* Endpoint 0 OUT data event */
     if (!controlOut())
@@ -742,7 +747,7 @@ void USBDevice::EP0out(void)
 void USBDevice::EP0in(void)
 {
 #ifdef DEBUG
-    printf("EP0IN\r\n");
+    iprintf("EP0IN - ");
 #endif
     /* Endpoint 0 IN data event */
     if (!controlIn())
@@ -764,7 +769,7 @@ void USBDevice::connect(void)
     USBHAL::connect();
 
     /* Block if not configured */
-//     while (!configured());
+//!    while (!configured());
 }
 
 void USBDevice::disconnect(void)
@@ -802,26 +807,33 @@ int USBDevice::findDescriptorIndex(uint8_t start, uint8_t descriptorType, uint8_
 
     int i;
     for (i = start; descriptors[i] != NULL; i++) {
+
         if (descriptors[i]->bDescType == DT_CONFIGURATION) {
 //             usbdesc_configuration *conf = (usbdesc_configuration *) descriptors[i];
 //             currentConfiguration = conf->bConfigurationValue;
 //             iprintf("CONF{%d/%d}\n", currentConfiguration, device.configuration);
             index = 0;
         }
+
 //         if ((currentConfiguration == device.configuration) || (descriptorType == DT_CONFIGURATION)) {
             if (descriptors[i]->bDescType == descriptorType) {
                 switch(descriptorType) {
                     case DT_CONFIGURATION: {
                         index = ((usbdesc_configuration *) descriptors[i])->bConfigurationValue;
+                        break;
                     };
                     case DT_INTERFACE: {
                         index = ((usbdesc_interface *) descriptors[i])->bInterfaceNumber;
+                        break;
                     };
                     case DT_ENDPOINT: {
                         index = ((usbdesc_endpoint *) descriptors[i])->bEndpointAddress;
+                        break;
                     };
+                    default:
+                      break;
                 }
-                iprintf("FOUND %d:%d at %d, looking for %d\n", descriptorType, index, i, descriptorIndex);
+//d             iprintf("FOUND %d:%d at %d, looking for %d\n", descriptorType, index, i, descriptorIndex);
                 if (index == descriptorIndex)
                 {
                     if (
@@ -830,7 +842,7 @@ int USBDevice::findDescriptorIndex(uint8_t start, uint8_t descriptorType, uint8_
                         (((usbdesc_interface *) descriptors[i])->bAlternateSetting == alternate)
                        )
                     {
-                        iprintf("Descriptor Found at %d!\n", i);
+//d                        iprintf("Descriptor Found at %d!\n", i);
                         return i;
                     }
                 }
@@ -838,7 +850,8 @@ int USBDevice::findDescriptorIndex(uint8_t start, uint8_t descriptorType, uint8_
             }
 //         }
     }
-    iprintf("Descriptor not found\n");
+
+    xprintf("Descriptor not found\n");
     return -1;
 }
 
@@ -888,7 +901,6 @@ bool USBDevice::write(uint8_t endpoint, uint8_t * buffer, uint32_t size, uint32_
         return false;
     }
 
-
     if(!configured()) {
         return false;
     }
@@ -904,7 +916,7 @@ bool USBDevice::write(uint8_t endpoint, uint8_t * buffer, uint32_t size, uint32_
     /* Wait for completion */
     setled(4, 1);
     do {
-        result = endpointWriteResult(endpoint);
+      result = endpointWriteResult(endpoint);
     } while ((result == EP_PENDING) && configured());
     setled(4, 0);
 
@@ -934,6 +946,7 @@ bool USBDevice::writeNB(uint8_t endpoint, uint8_t * buffer, uint32_t size, uint3
 
     result = endpointWriteResult(endpoint);
 
+    // always false?
     return (result == EP_COMPLETED);
 }
 

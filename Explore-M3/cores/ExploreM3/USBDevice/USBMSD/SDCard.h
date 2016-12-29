@@ -26,40 +26,23 @@
 #ifndef SDCARD_H
 #define SDCARD_H
 
-//!#include "spi.h"
+#include "SPI.h"
 #include "gpio.h"
-
 #include "disk.h"
 //!#include "mbed.h"
-
 // #include "DMA.h"
 
 /** Access the filesystem on an SD Card using SPI
- *
- * @code
- * #include "mbed.h"
- * #include "SDFileSystem.h"
- *
- * SDFileSystem sd(p5, p6, p7, p12, "sd"); // mosi, miso, sclk, cs
- *
- * int main() {
- *     FILE *fp = fopen("/sd/myfile.txt", "w");
- *     fprintf(fp, "Hello World!\n");
- *     fclose(fp);
- * }
  */
 class SDCard : public MSD_Disk {
 public:
 
     /** Create the File System for accessing an SD Card using SPI
      *
-     * @param mosi SPI mosi pin connected to SD Card
-     * @param miso SPI miso pin conencted to SD Card
-     * @param sclk SPI sclk pin connected to SD Card
+     * @param spi_channel The SPI channel number to use
      * @param cs   DigitalOut pin used as SD Card chip select
-     * @param name The name used to access the virtual filesystem
      */
-    SDCard(PinName, PinName, PinName, PinName);
+    SDCard (uint8_t spi_channel, gpioPins_et cs);
     virtual ~SDCard() {};
 
     typedef enum {
@@ -99,8 +82,8 @@ protected:
     uint32_t _sd_sectors();
     uint32_t _sectors;
 
-    mbed::SPI _spi;
-    GPIO _cs;
+    SPIClass _spi;
+    gpioPins_et  _cs;
 
     volatile bool busyflag;
 

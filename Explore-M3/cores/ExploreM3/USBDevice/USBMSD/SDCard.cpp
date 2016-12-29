@@ -26,7 +26,7 @@
 /* Introduction
  * ------------
  * SD and MMC cards support a number of interfaces, but common to them all
- * is one based on SPI. This is the one I'm implmenting because it means
+ * is one based on SPI. This is the one I'm implementing because it means
  * it is much more portable even though not so performant, and we already
  * have the mbed SPI Interface!
  *
@@ -46,7 +46,7 @@
  * ACMD41 is repeatedly issued to initialise the card, until "in idle"
  * (bit 0) of the R1 response goes to '0', indicating it is initialised.
  *
- * You should also indicate whether the host supports High Capicity cards,
+ * You should also indicate whether the host supports High Capacity cards,
  * and check whether the card is high capacity - i'll also ignore this
  *
  * SPI Protocol
@@ -120,16 +120,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "gpio.h"
 #include "SDCard.h"
 
-static const uint8_t OXFF = 0xFF;
+// #define DEBUG 1
+#include "debug.h"
+
 
 #define SD_COMMAND_TIMEOUT 5000
 
-SDCard::SDCard(PinName mosi, PinName miso, PinName sclk, PinName cs) :
-  _spi(mosi, miso, sclk), _cs(cs) {
-    _cs.output();
-    _cs = 1;
+SDCard::SDCard(uint8_t spi_channel, gpioPins_et cs) :
+  _spi(spi_channel), _cs(cs)
+{
+    GPIO_PinDirection(_cs, OUTPUT);
+    GPIO_PinWrite(_cs, 1);
     busyflag = false;
     _sectors = 0;
 }
@@ -200,27 +204,27 @@ SDCard::SDCard(PinName mosi, PinName miso, PinName sclk, PinName cs) :
 
 SDCard::CARD_TYPE SDCard::initialise_card() {
     // Set to 25kHz for initialisation, and clock card with cs = 1
-    _spi.frequency(25000);
-    _cs = 1;
+    _spi.setClockFrequency(25000);
+    GPIO_PinWrite(_cs, 1);
 
     for(int i=0; i<24; i++) {
-        _spi.write(0xFF);
+        _spi.transfer(0xFF);
     }
 
     // send CMD0, should return with all zeros except IDLE STATE set (bit 0)
     if(_cmd(SDCMD_GO_IDLE_STATE, 0) != R1_IDLE_STATE) {
-        fprintf(stderr, "No disk, or could not put SD card in to SPI idle state\n");
+        eprintf("No disk, or could not put SD card in to SPI idle state\n");
         return cardtype = SDCARD_FAIL;
     }
 
-    // send CMD8 to determine whther it is ver 2.x
+    // send CMD8 to determine whether it is ver 2.x
     int r = _cmd8();
     if(r == R1_IDLE_STATE) {
         return initialise_card_v2();
     } else if(r == (R1_IDLE_STATE | R1_ILLEGAL_COMMAND)) {
         return initialise_card_v1();
     } else {
-        fprintf(stderr, "Not in idle state after sending CMD8 (not an SD card?)\n");
+        eprintf("Not in idle state after sending CMD8 (not an SD card?)\n");
         return cardtype = SDCARD_FAIL;
     }
 }
@@ -233,7 +237,7 @@ SDCard::CARD_TYPE SDCard::initialise_card_v1() {
         }
     }
 
-    fprintf(stderr, "Timeout waiting for v1.x card\n");
+    eprintf("Timeout waiting for v1.x card\n");
     return SDCARD_FAIL;
 }
 
@@ -251,13 +255,15 @@ SDCard::CARD_TYPE SDCard::initialise_card_v2() {
         }
     }
 
-    fprintf(stderr, "Timeout waiting for v2.x card\n");
+    eprintf("Timeout waiting for v2.x card\n");
     return cardtype = SDCARD_FAIL;
 }
 
 int SDCard::disk_initialize()
 {
     busyflag = true;
+
+    xprintf("disk_init\n");
 
     _sectors = 0;
 
@@ -272,12 +278,12 @@ int SDCard::disk_initialize()
 
     // Set block length to 512 (CMD16)
     if(_cmd(SDCMD_SET_BLOCKLEN, 512) != 0) {
-        fprintf(stderr, "Set 512-byte block timed out\n");
+        eprintf("Set 512-byte block timed out\n");
         busyflag = false;
         return 1;
     }
 
-    _spi.frequency(2500000); // Set to 2.5MHz for data transfer
+    _spi.setClockFrequency(2500000); // Set to 2.5MHz for data transfer
 
     busyflag = false;
 
@@ -308,6 +314,7 @@ int SDCard::disk_write(const char *buffer, uint32_t block_number)
 
 int SDCard::disk_read(char *buffer, uint32_t block_number)
 {
+    xprintf ("disk_read\n");
     if (busyflag)
         return 0;
 
@@ -329,13 +336,17 @@ int SDCard::disk_read(char *buffer, uint32_t block_number)
 }
 
 int SDCard::disk_status() { return (_sectors > 0)?0:1; }
+
 int SDCard::disk_sync() {
     // TODO: wait for DMA, wait for card not busy
     return 0;
 }
 uint32_t SDCard::disk_sectors() { return _sectors; }
+
 uint64_t SDCard::disk_size() { return ((uint64_t) _sectors) << 9; }
+
 uint32_t SDCard::disk_blocksize() { return (1<<9); }
+
 bool SDCard::disk_canDMA() { return false; }
 
 SDCard::CARD_TYPE SDCard::card_type()
@@ -346,120 +357,120 @@ SDCard::CARD_TYPE SDCard::card_type()
 // PRIVATE FUNCTIONS
 
 int SDCard::_cmd(int cmd, uint32_t arg) {
-    _cs = 0;
+  GPIO_PinWrite(_cs, 0);
 
     // send a command
-    _spi.write(0x40 | cmd);
-    _spi.write(arg >> 24);
-    _spi.write(arg >> 16);
-    _spi.write(arg >> 8);
-    _spi.write(arg >> 0);
-    _spi.write(0x95);
+    _spi.transfer(0x40 | cmd);
+    _spi.transfer(arg >> 24);
+    _spi.transfer(arg >> 16);
+    _spi.transfer(arg >> 8);
+    _spi.transfer(arg >> 0);
+    _spi.transfer(0x95);
 
-    // wait for the repsonse (response[7] == 0)
+    // wait for the response (response[7] == 0)
     for(int i=0; i<SD_COMMAND_TIMEOUT; i++) {
-        int response = _spi.write(0xFF);
+        int response = _spi.transfer(0xFF);
         if(!(response & 0x80)) {
-            _cs = 1;
-            _spi.write(0xFF);
+          GPIO_PinWrite(_cs, 1);
+            _spi.transfer(0xFF);
             return response;
         }
     }
-    _cs = 1;
-    _spi.write(0xFF);
+    GPIO_PinWrite(_cs, 1);
+    _spi.transfer(0xFF);
     return -1; // timeout
 }
 int SDCard::_cmdx(int cmd, uint32_t arg) {
-    _cs = 0;
+  GPIO_PinWrite(_cs, 0);
 
     // send a command
-    _spi.write(0x40 | cmd);
-    _spi.write(arg >> 24);
-    _spi.write(arg >> 16);
-    _spi.write(arg >> 8);
-    _spi.write(arg >> 0);
-    _spi.write(0x95);
+    _spi.transfer(0x40 | cmd);
+    _spi.transfer(arg >> 24);
+    _spi.transfer(arg >> 16);
+    _spi.transfer(arg >> 8);
+    _spi.transfer(arg >> 0);
+    _spi.transfer(0x95);
 
-    // wait for the repsonse (response[7] == 0)
+    // wait for the response (response[7] == 0)
     for(int i=0; i<SD_COMMAND_TIMEOUT; i++) {
-        int response = _spi.write(0xFF);
+        int response = _spi.transfer(0xFF);
         if(!(response & 0x80)) {
             return response;
         }
     }
-    _cs = 1;
-    _spi.write(0xFF);
+    GPIO_PinWrite(_cs, 1);
+    _spi.transfer(0xFF);
     return -1; // timeout
 }
 
 
 int SDCard::_cmd58(uint32_t *ocr) {
-    _cs = 0;
+  GPIO_PinWrite(_cs, 0);
     int arg = 0;
 
     // send a command
-    _spi.write(0x40 | 58);
-    _spi.write(arg >> 24);
-    _spi.write(arg >> 16);
-    _spi.write(arg >> 8);
-    _spi.write(arg >> 0);
-    _spi.write(0x95);
+    _spi.transfer(0x40 | 58);
+    _spi.transfer(arg >> 24);
+    _spi.transfer(arg >> 16);
+    _spi.transfer(arg >> 8);
+    _spi.transfer(arg >> 0);
+    _spi.transfer(0x95);
 
-    // wait for the repsonse (response[7] == 0)
+    // wait for the response (response[7] == 0)
     for(int i=0; i<SD_COMMAND_TIMEOUT; i++) {
-        int response = _spi.write(0xFF);
+        int response = _spi.transfer(0xFF);
         if(!(response & 0x80)) {
-            *ocr = _spi.write(0xFF) << 24;
-            *ocr |= _spi.write(0xFF) << 16;
-            *ocr |= _spi.write(0xFF) << 8;
-            *ocr |= _spi.write(0xFF) << 0;
+            *ocr = _spi.transfer(0xFF) << 24;
+            *ocr |= _spi.transfer(0xFF) << 16;
+            *ocr |= _spi.transfer(0xFF) << 8;
+            *ocr |= _spi.transfer(0xFF) << 0;
 //            printf("OCR = 0x%08X\n", ocr);
-            _cs = 1;
-            _spi.write(0xFF);
+            GPIO_PinWrite(_cs, 1);
+            _spi.transfer(0xFF);
             return response;
         }
     }
-    _cs = 1;
-    _spi.write(0xFF);
+    GPIO_PinWrite(_cs, 1);
+    _spi.transfer(0xFF);
     return -1; // timeout
 }
 
 int SDCard::_cmd8() {
-    _cs = 0;
+  GPIO_PinWrite(_cs, 0);
 
     // send a command
-    _spi.write(0x40 | SDCMD_SEND_IF_COND); // CMD8
-    _spi.write(0x00);     // reserved
-    _spi.write(0x00);     // reserved
-    _spi.write(0x01);     // 3.3v
-    _spi.write(0xAA);     // check pattern
-    _spi.write(0x87);     // crc
+    _spi.transfer(0x40 | SDCMD_SEND_IF_COND); // CMD8
+    _spi.transfer(0x00);     // reserved
+    _spi.transfer(0x00);     // reserved
+    _spi.transfer(0x01);     // 3.3v
+    _spi.transfer(0xAA);     // check pattern
+    _spi.transfer(0x87);     // crc
 
-    // wait for the repsonse (response[7] == 0)
+    // wait for the response (response[7] == 0)
     for(int i=0; i<SD_COMMAND_TIMEOUT * 1000; i++) {
         char response[5];
-        response[0] = _spi.write(0xFF);
+        response[0] = _spi.transfer(0xFF);
         if(!(response[0] & 0x80)) {
                 for(int j=1; j<5; j++) {
-                    response[i] = _spi.write(0xFF);
+                    response[i] = _spi.transfer(0xFF);
                 }
-                _cs = 1;
-                _spi.write(0xFF);
+                GPIO_PinWrite(_cs, 1);
+                _spi.transfer(0xFF);
                 return response[0];
         }
     }
-    _cs = 1;
-    _spi.write(0xFF);
+    GPIO_PinWrite(_cs, 1);
+    _spi.transfer(0xFF);
     return -1; // timeout
 }
 
 int SDCard::_read(char *buffer, int length) {
-    _cs = 0;
+  GPIO_PinWrite(_cs, 0);
 
     // read until start byte (0xFF)
-    while(_spi.write(0xFF) != 0xFE);
+    while(_spi.transfer(0xFF) != 0xFE);
 //     uint8_t r;
-//     while((r = _spi.write(0xFF)) != 0xFE)
+//     while((r = _spi.transfer(0xFF)) != 0xFE)
 //     {
 //         iprintf("0x%02X ", r);
 //         for (volatile uint32_t j = 262144; j; j--);
@@ -469,43 +480,43 @@ int SDCard::_read(char *buffer, int length) {
 
     // read data
     for(int i=0; i<length; i++) {
-        buffer[i] = _spi.write(0xFF);
+        buffer[i] = _spi.transfer(0xFF);
     }
-    _spi.write(0xFF); // checksum
-    _spi.write(0xFF);
+    _spi.transfer(0xFF); // checksum
+    _spi.transfer(0xFF);
 
-    _cs = 1;
-    _spi.write(0xFF);
+    GPIO_PinWrite(_cs, 1);
+    _spi.transfer(0xFF);
     return 0;
 }
 
 int SDCard::_write(const char *buffer, int length) {
-    _cs = 0;
+  GPIO_PinWrite(_cs, 0);
 
     // indicate start of block
-    _spi.write(0xFE);
+    _spi.transfer(0xFE);
 
     // write the data
     for(int i=0; i<length; i++) {
-        _spi.write(buffer[i]);
+        _spi.transfer(buffer[i]);
     }
 
     // write the checksum
-    _spi.write(0xFF);
-    _spi.write(0xFF);
+    _spi.transfer(0xFF);
+    _spi.transfer(0xFF);
 
-    // check the repsonse token
-    if((_spi.write(0xFF) & 0x1F) != 0x05) {
-        _cs = 1;
-        _spi.write(0xFF);
+    // check the response token
+    if((_spi.transfer(0xFF) & 0x1F) != 0x05) {
+      GPIO_PinWrite(_cs, 1);
+        _spi.transfer(0xFF);
         return 1;
     }
 
     // wait for write to finish
-    while(_spi.write(0xFF) == 0);
+    while(_spi.transfer(0xFF) == 0);
 
-    _cs = 1;
-    _spi.write(0xFF);
+    GPIO_PinWrite(_cs, 1);
+    _spi.transfer(0xFF);
     return 0;
 }
 
@@ -526,13 +537,13 @@ uint32_t SDCard::_sd_sectors() {
 
     // CMD9, Response R2 (R1 byte + 16-byte block read)
     if(_cmdx(SDCMD_SEND_CSD, 0) != 0) {
-        fprintf(stderr, "Didn't get a response from the disk\n");
+        eprintf("Didn't get a response from the disk\n");
         return 0;
     }
 
     char csd[16];
     if(_read(csd, 16) != 0) {
-        fprintf(stderr, "Couldn't read csd response from disk\n");
+        eprintf("Couldn't read csd response from disk\n");
         return 0;
     }
 
@@ -547,7 +558,7 @@ uint32_t SDCard::_sd_sectors() {
     {
         if (cardtype == SDCARD_V2HC)
         {
-            fprintf(stderr, "SDHC card with regular SD descriptor!\n");
+            eprintf("SDHC card with regular SD descriptor!\n");
             return 0;
         }
         uint32_t c_size = ext_bits(csd, 73, 62);
@@ -567,7 +578,7 @@ uint32_t SDCard::_sd_sectors() {
     {
         if (cardtype != SDCARD_V2HC)
         {
-            fprintf(stderr, "SD V1 or V2 card with SDHC descriptor!\n");
+            eprintf("SD V1 or V2 card with SDHC descriptor!\n");
             return 0;
         }
         uint32_t c_size = ext_bits(csd, 69, 48);
@@ -575,7 +586,7 @@ uint32_t SDCard::_sd_sectors() {
 
         return blocknr;
     }
-    fprintf(stderr, "This disk tastes funny! (%d) I only know about type 0 or 1 CSD structures\n", csd_structure);
+    eprintf("This disk tastes funny! (%d) I only know about type 0 or 1 CSD structures\n", csd_structure);
     return 0;
 }
 

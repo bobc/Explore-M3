@@ -35,6 +35,8 @@
 #include "gpio.h"
 //#include "stdutils.h"
 
+#include "SDCard.h"
+#include "USBMSD.h"
 
 
 /**
@@ -129,16 +131,29 @@ const uint8_t PIN_MAP[BOARD_MAX_GPIO_PINS] = {
 
 };
 
+SDCard sdcard_interface  (1, P0_6);      // this selects SPI1 as the sdcard as it is on Smoothieboard
+
 USB usb_interface;
 USBSerial Serial (&usb_interface);
+USBMSD usb_msc (&usb_interface, &sdcard_interface);
+
 
 
 void variant_init (void) {
 
+  //!debug
+  Serial0.begin(115200);
+
+  UART0_Printf ("START\n");
+
+  sdcard_interface.disk_initialize(); // not needed?
+
   usb_interface.init();
   usb_interface.connect();
 
-  Serial.begin(9600);
+  usb_msc.connect();
+
+  Serial.begin(9600); // ?
 
   char * buf = "hello\n";
 //  Serial.puts(buf);

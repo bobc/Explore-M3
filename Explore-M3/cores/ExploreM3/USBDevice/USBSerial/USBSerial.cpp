@@ -26,14 +26,11 @@
 //!#include "libs/SerialMessage.h"
 //!#include "StreamOutputPool.h"
 
-// extern void setled(int, bool);
-#define setled(a, b) do {} while (0)
-
-#define iprintf(...) do { } while (0)
+// #define DEBUG 1
+#include "debug.h"
 
 //USB u __attribute__ ((section ("AHBSRAM0")));
 //USBSerial usbserial __attribute__ ((section ("AHBSRAM0"))) (&u);
-
 
 
 USBSerial::USBSerial(USB *u): USBCDC(u), rxbuf(256 + 8), txbuf(128 + 8)

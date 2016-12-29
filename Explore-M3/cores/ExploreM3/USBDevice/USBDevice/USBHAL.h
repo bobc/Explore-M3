@@ -52,7 +52,7 @@ private:
 
     static USBHAL * instance;
 
-    uint8_t can_transfer[32];
+    //uint8_t can_transfer[32];
 
 protected:
     void configureDevice(void);
@@ -84,7 +84,6 @@ protected:
     virtual bool USBEvent_busReset(void){return false;};
     virtual bool USBEvent_connectStateChanged(bool connected){return false;};
     virtual bool USBEvent_suspendStateChanged(bool suspended){return false;};
-
     virtual bool USBEvent_Frame(uint16_t){return false;};
 
     virtual bool USBEvent_Request(CONTROL_TRANSFER&){return false;};
@@ -94,12 +93,13 @@ protected:
     virtual bool USBEvent_EPOut(uint8_t, uint8_t){return false;};
 
     virtual void busReset(void){};
-    virtual void EP0setupCallback(void){};
-    virtual void EP0out(void){};
-    virtual void EP0in(void){};
     virtual void connectStateChanged(unsigned int connected){};
     virtual void suspendStateChanged(unsigned int suspended){};
     virtual void SOF(int frameNumber){};
+
+    virtual void EP0setupCallback(void){};
+    virtual void EP0out(void){};
+    virtual void EP0in(void){};
 };
 
 #endif
