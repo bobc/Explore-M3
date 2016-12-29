@@ -40,9 +40,10 @@
 
 
 //__heap_end__ - __heap_start__;
-extern unsigned char heap[1024];
+extern unsigned char *heap;
 extern char __heap_start__;
 extern char __heap_end__;
+
 #define STACK_POINTER() ((int *)heap)
 
 struct __freelist {
