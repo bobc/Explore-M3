@@ -39,17 +39,25 @@ extern "C" void __libc_init_array(void);
 #define USER_FLASH_START 0          // If no bootloader
 //#define USER_FLASH_START 0x2000   // If bootloader
 
-#define HEAP_SIZE 1024
+#define HEAP_SIZE 4096
 
 __attribute__ ((section(".heap")))  
 unsigned char heap[HEAP_SIZE];
 
+__attribute__ ((section(".stack")))
+unsigned char __stack[4096];
+
+extern void *g_pfnVectors;
+
 int main( void )
 {
+  uint32_t base_address = (uint32_t)&g_pfnVectors;
+
   SystemCoreClockUpdate();
 
   /* Change the Vector Table to the USER_FLASH_START */
-  SCB->VTOR = (USER_FLASH_START & 0x1FFFFF80);
+  //SCB->VTOR = (USER_FLASH_START & 0x1FFFFF80);
+  SCB->VTOR = base_address & 0x1FFFFF80;
 
   __libc_init_array();
 
