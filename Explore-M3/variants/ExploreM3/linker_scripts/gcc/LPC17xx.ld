@@ -3,7 +3,8 @@
 /* Linker script to configure memory regions. */
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x00002000, LENGTH = 480K
+/*  FLASH (rx) : ORIGIN = 0x00002000, LENGTH = 480K */
+  FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 480K
   RAM (rwx) : ORIGIN = 0x10000000, LENGTH = 0x8000
 
   USB_RAM(rwx) : ORIGIN = 0x2007C000, LENGTH = 16K
@@ -132,23 +133,23 @@ SECTIONS
         __bss_end__ = .;
     } > RAM
        
-.heap : {
-
-    __heap_start__ = heap;
-
-    KEEP(*(.heap))
-      end = __heap_start__;
-    __heap_end__ = .;
-        _end = __heap_end__;
-    __HeapLimit = __heap_end__ - __heap_start__;
-} > RAM
+	.heap : {
+	    __heap_start__ = heap;
+	
+	    KEEP(*(.heap))
+	    end = __heap_start__;
+	    __heap_end__ = .;
+	    
+	    _end = __heap_end__;
+	    __HeapLimit = __heap_end__ - __heap_start__;
+	} > RAM
 
     /* .stack_dummy section doesn't contains any symbols. It is only
      * used for linker to calculate size of stack sections, and assign
      * values to stack symbols later */
     .stack_dummy :
     {
-        *(.stack)
+        KEEP(*(.stack))
     } > RAM
 
     /* Set stack top to end of RAM, and stack limit move down by
