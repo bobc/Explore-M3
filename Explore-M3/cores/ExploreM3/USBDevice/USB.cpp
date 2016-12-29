@@ -15,15 +15,15 @@ usbdesc_device USB::device = {
 	USB_VERSION_2_0,	// .bcdUSB
 	UC_MISC,        	// .bDeviceClass
 	SUBCLASS_IAD,	    // .bDeviceSubClass
-	PROTOCOL_IAD,		// .bDeviceProtocol
-	64,					// .bMaxPacketSize0
-	0x1d50,				// .idVendor
-	0x6015,				// .idProduct
-	0x0100,				// .bcdDevice
-	0,					// .iManufacturer
-	0,					// .iProduct
-	0,					// .iSerialNumber
-	1,					// .bNumConfigurations
+	PROTOCOL_IAD,		  // .bDeviceProtocol
+	64,					      // .bMaxPacketSize0
+	0x1d50,				    // .idVendor
+	0x6015,				    // .idProduct
+	0x0100,				    // .bcdDevice
+	0,					  // .iManufacturer
+	0,					  // .iProduct
+	0,					  // .iSerialNumber
+	1,					  // .bNumConfigurations
 };
 
 
@@ -266,7 +266,6 @@ bool USB::USBEvent_RequestComplete(CONTROL_TRANSFER& transfer, uint8_t *buf, uin
             }
         }
     }
-    return false;
     return false;
 };
 
@@ -551,6 +550,7 @@ void USB::dumpString(int i) {
 	iprintf("-none-\n");
 }
 
+//todo: debug
 void putchar (char c) {}
 
 void USB::dumpString(usbdesc_string *s) {
