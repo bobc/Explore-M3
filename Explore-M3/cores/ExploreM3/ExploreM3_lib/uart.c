@@ -49,11 +49,11 @@ Errors and omissions should be reported to codelibraries@exploreembedded.com
 #define C_UartOne_U8         1u
 
 usart_channel_map USART_BASE[4]=
-{  /* TxPin RxPin UART_PinFun   PCON Bit Associated UART Structure    */
-    { P0_2, P0_3, PINSEL_FUNC_1,  3     ,(LPC_UART_TypeDef *)LPC_UART0_BASE}, /* Configure P0_2,P0_3 for UART0 function */
+{  /* TxPin  RxPin  UART_PinFun   PCON Bit Associated UART Structure    */
+    { P0_2,  P0_3,  PINSEL_FUNC_1,  3     ,(LPC_UART_TypeDef *)LPC_UART0_BASE}, /* Configure P0_2,P0_3 for UART0 function */
     { P0_15, P0_16, PINSEL_FUNC_1,  4     ,(LPC_UART_TypeDef *)LPC_UART1_BASE}, /* Configure P2_0,P2_1 for UART1 function */
-    { P0_10,P0_11,PINSEL_FUNC_1,  24    ,(LPC_UART_TypeDef *)LPC_UART2_BASE}, /* Configure P0_10,P0_11 for UART2 function */
-    { P0_0,P0_1,PINSEL_FUNC_2,  25    ,(LPC_UART_TypeDef *)LPC_UART3_BASE}  /* Configure P4_28,P4_29 for UART3 function */ 
+    { P0_10, P0_11, PINSEL_FUNC_1,  24    ,(LPC_UART_TypeDef *)LPC_UART2_BASE}, /* Configure P0_10,P0_11 for UART2 function */
+    { P0_0,  P0_1,  PINSEL_FUNC_2,  25    ,(LPC_UART_TypeDef *)LPC_UART3_BASE}  /* Configure P4_28,P4_29 for UART3 function */
 };
 
 
@@ -322,7 +322,7 @@ void UART_TxNumber(uint8_t var_numericSystem_u8, uint32_t var_number_u32, uint8_
 #if ((Enable_UART_TxNumber==1) || (Enable_UART_TxFloatNumber==1) || (Enable_UART_Printf == 1))
 void UART_TxNumber(uint8_t var_uartChannel_u8, uint8_t var_numericSystem_u8, uint32_t var_number_u32, uint8_t var_numOfDigitsToTransmit_u8)
 {
-    uint8_t i=0,a[10];
+    uint8_t i=0, a[10];
 
     if(C_BINARY_U8 == var_numericSystem_u8)
     {
@@ -337,9 +337,12 @@ void UART_TxNumber(uint8_t var_uartChannel_u8, uint8_t var_numericSystem_u8, uin
     }     
     else if(var_number_u32==0)
     {
+      if (var_numOfDigitsToTransmit_u8 == C_DefaultDigitsToTransmit_U8)
+        UART_TxChar(var_uartChannel_u8, '0');
+      else
         /* If the number is zero then update the array with the same for transmitting */
-        for(i=0;((i<var_numOfDigitsToTransmit_u8) && (i<C_MaxDigitsToTransmit_U8)) ;i++)
-            UART_TxChar(var_uartChannel_u8,'0');
+        for(i=0; (i<var_numOfDigitsToTransmit_u8) && (i<C_MaxDigitsToTransmit_U8) ; i++)
+            UART_TxChar(var_uartChannel_u8, '0');
     }
     else
     {
