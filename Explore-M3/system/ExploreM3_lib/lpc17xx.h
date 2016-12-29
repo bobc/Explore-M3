@@ -769,7 +769,7 @@ typedef struct
        uint32_t RESERVED0[40];
   __I  uint32_t Module_ID;
 
-  __I  uint32_t OTGIntSt;               /* USB On-The-Go Registers            */
+  __I  uint32_t OTGIntSt;               /* USB On-The-Go Registers            */ // 5000 C100
   __IO uint32_t OTGIntEn;
   __O  uint32_t OTGIntSet;
   __O  uint32_t OTGIntClr;
